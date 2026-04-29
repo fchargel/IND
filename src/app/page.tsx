@@ -21,29 +21,40 @@ function formatDate(dateStr: string | null) {
 }
 
 export default async function HomePage() {
-  const supabase = await createClient()
+  let heroConfig = null, institutionalConfig = null, signupConfig = null
+  let projects: Project[] = [], articles: Article[] = []
 
-  const [{ data: heroConfig }, { data: institutionalConfig }, { data: signupConfig }, { data: projects }, { data: articles }] = await Promise.all([
-    supabase.from("page_config").select("value").eq("key", "hero").single(),
-    supabase.from("page_config").select("value").eq("key", "institutional").single(),
-    supabase.from("page_config").select("value").eq("key", "signup").single(),
-    supabase.from("projects").select("*").eq("active", true).order("display_order"),
-    supabase.from("articles").select("*").eq("published", true).order("published_at", { ascending: false }).limit(9),
-  ])
+  try {
+    const supabase = await createClient()
+    const [h, i, s, p, a] = await Promise.all([
+      supabase.from("page_config").select("value").eq("key", "hero").single(),
+      supabase.from("page_config").select("value").eq("key", "institutional").single(),
+      supabase.from("page_config").select("value").eq("key", "signup").single(),
+      supabase.from("projects").select("*").eq("active", true).order("display_order"),
+      supabase.from("articles").select("*").eq("published", true).order("published_at", { ascending: false }).limit(9),
+    ])
+    heroConfig = h.data; institutionalConfig = i.data; signupConfig = s.data
+    projects = (p.data as Project[]) ?? []; articles = (a.data as Article[]) ?? []
+  } catch {
+    // Supabase unavailable — render with static fallbacks
+  }
 
-  const hero = (heroConfig?.value ?? {}) as Record<string, unknown>
-  const institutional = (institutionalConfig?.value ?? {}) as Record<string, unknown>
-  const signup = (signupConfig?.value ?? {}) as Record<string, unknown>
+  const hero = ((heroConfig as {value?: Record<string, unknown>})?.value ?? {}) as Record<string, unknown>
+  const institutional = ((institutionalConfig as {value?: Record<string, unknown>})?.value ?? {}) as Record<string, unknown>
+  const signup = ((signupConfig as {value?: Record<string, unknown>})?.value ?? {}) as Record<string, unknown>
 
-  const heroHeadline = (hero.headline as string) ?? "Reescrever o futuro com quem mais precisa."
-  const heroMission = (hero.mission as string) ?? "O Instituto Novos Destinos é uma organização sem fins lucrativos que promove projetos esportivos, educacionais, sociais e culturais."
-  const heroStats = (hero.stats as Array<{ num: string; lbl: string }>) ?? []
+  const heroHeadline = (hero.headline as string) ?? "Reescrever o futuro <em>com</em><br/>quem mais precisa."
+  const heroMission = (hero.mission as string) ?? "O Instituto Novos Destinos é uma organização sem fins lucrativos que promove projetos esportivos, educacionais, sociais e culturais — para ajudar pessoas a mudarem suas histórias e encontrarem novas oportunidades."
+  const heroStats = (hero.stats as Array<{ num: string; lbl: string }>) ?? [{ num: "4", lbl: "Áreas de atuação" }, { num: "2020", lbl: "Ano de fundação" }]
 
-  const institutionalBody = (institutional.body as string) ?? ""
-  const institutionalMeta = (institutional.meta as Record<string, string>) ?? {}
+  const institutionalBody = (institutional.body as string) ?? "Somos uma organização da sociedade civil sem fins lucrativos. <span class=\"hl\">Nossa missão é oportunizar, com dignidade e propósito,</span> novos caminhos para pessoas em situação de vulnerabilidade."
+  const institutionalMeta = (institutional.meta as Record<string, string>) ?? { "Natureza": "OSC sem fins lucrativos", "Fundação": "2020", "Atuação": "Educacional · Esportiva · Cultural · Social" }
 
-  const signupHeadline = (signup.headline as string) ?? "Quer fazer parte?"
-  const signupItems = (signup.items as Array<{ title: string; description: string; url: string }>) ?? []
+  const signupHeadline = (signup.headline as string) ?? "Quer fazer<br/>parte?"
+  const signupItems = (signup.items as Array<{ title: string; description: string; url: string }>) ?? [
+    { title: "Oficina de fotografia esportiva", description: "Inscrições abertas · forms.gle", url: "https://forms.gle/G8fCCccJtESRCivQ8" },
+    { title: "Oficina de storymaker", description: "Inscrições abertas · forms.gle", url: "https://forms.gle/sj1y9GEjWJzapyob8" },
+  ]
 
   return (
     <>
@@ -148,7 +159,7 @@ export default async function HomePage() {
         </div>
         <div className="container">
           <div className="projects">
-            {(projects as Project[])?.map((proj, i) => (
+            {projects.map((proj, i) => (
               <article className="project" key={proj.id}>
                 <div className="project-img">
                   {proj.image_url && (
@@ -198,7 +209,7 @@ export default async function HomePage() {
             <div className="right">Cobertura jornalística dos nossos projetos.</div>
           </div>
           <div className="news">
-            {(articles as Article[])?.map((art) => (
+            {articles.map((art) => (
               <a key={art.id} className="news-card" href={art.content ?? "#"} target="_blank" rel="noopener">
                 <div className="news-pub">
                   <small>Veículo</small>

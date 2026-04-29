@@ -4,11 +4,25 @@ import { LogoMark } from "./Logo"
 export function SiteFooter() {
   return (
     <>
-      <div className="megamark" aria-hidden="true">
-        <svg viewBox="0 0 1366 480">
-          <text x="50%" y="62%" textAnchor="middle" fontFamily="Aloevera Display" fontWeight="900" fontSize="320" letterSpacing="-16" fill="currentColor">Novos Destinos</text>
-        </svg>
-      </div>
+      <section className="voluntario-cta">
+        <div className="container voluntario-inner">
+          <div>
+            <span className="eyebrow">Faça parte</span>
+            <h2 className="display voluntario-h2">
+              Quer ser<br/><em>voluntário?</em>
+            </h2>
+          </div>
+          <div className="voluntario-side">
+            <p>Se você quer contribuir com o Instituto Novos Destinos — como educador, fotógrafo, comunicador ou qualquer outra área — entre em contato. Trabalhamos juntos por um futuro mais justo.</p>
+            <a href="mailto:contato@institutonovosdestinos.org" className="btn btn-primary">
+              Fale com a gente
+              <svg className="arr" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
       <footer id="contato">
         <div className="container">
           <div className="foot-grid">
